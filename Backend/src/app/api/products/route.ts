@@ -28,7 +28,7 @@ function buildProductLookup(id: string) {
   return Types.ObjectId.isValid(id) ? { _id: id } : { slug: id };
 }
 
-function normalizeProductBody(body: Record<string, unknown>) {
+function normalizeProductBody(body: Record<string, unknown>): Record<string, unknown> {
   const { id: _id, image, img, ...rest } = body;
   const normalizedImg = normalizeImgUrl((image as string) || (img as string));
   return {

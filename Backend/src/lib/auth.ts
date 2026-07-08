@@ -5,7 +5,7 @@ import type { IUser } from "@/types";
 
 const JWT_SECRET = process.env.JWT_SECRET || "fallback-dev-secret";
 
-export type JwtPayload = { userId: string; email: string };
+export type JwtPayload = { userId: string; email: string; isAdmin?: boolean };
 
 export function signToken(payload: JwtPayload) {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
