@@ -2,10 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShoppingBag, Package, Users, LayoutDashboard, TrendingUp, Settings, Menu, X, User, Bell, Lock, Globe, CreditCard, Save, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
+import { buildPageMeta } from "@/lib/seo";
+
 export const Route = createFileRoute("/admin-settings")({
-  head: () => ({
-    meta: [{ title: "Settings — Treadly Admin" }, { name: "description", content: "Manage settings in Treadly admin panel" }],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Admin Settings — Luxury Shoes",
+      description: "Manage settings.",
+      path: "/admin-settings",
+      noindex: true,
+    }),
   component: AdminSettings,
 });
 

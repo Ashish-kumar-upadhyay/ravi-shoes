@@ -1,16 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/site-shell";
 import { ShieldCheck, Truck, Headphones, Award, Users } from "lucide-react";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About Us — Treadly" },
-      { name: "description", content: "Learn about Treadly's mission to bring fashion-forward, comfortable footwear to every step you take." },
-      { property: "og:title", content: "About Us — Treadly" },
-      { property: "og:description", content: "Learn about Treadly's mission to bring fashion-forward, comfortable footwear to every step you take." },
-    ],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "About Luxury Shoes — Premium Footwear Store",
+      description:
+        "Learn about Luxury Shoes — India's trusted online store for premium designer footwear, luxury sneakers and formal shoes.",
+      path: "/about",
+    }),
   component: AboutPage,
 });
 
@@ -20,11 +20,11 @@ function AboutPage() {
       <div className="px-6 py-10 md:px-10">
         <div className="mx-auto max-w-3xl text-center">
           <h1 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
-            About Treadly
+            About Luxury Shoes
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm text-neutral-600">
-            We believe great shoes are the foundation of confidence. Our mission is to blend style,
-            comfort, and performance in every pair we craft.
+            We believe luxury shoes are the foundation of confidence. Our mission is to bring premium
+            designer footwear — blending style, comfort, and performance in every pair.
           </p>
         </div>
 

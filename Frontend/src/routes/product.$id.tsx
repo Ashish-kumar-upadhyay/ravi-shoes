@@ -5,8 +5,56 @@ import { Shell } from "@/components/site-shell";
 import { useStore, useAuth } from "@/lib/store";
 import { useProductDetail, useProductReviews, useSubmitReview } from "@/hooks/use-products";
 import { productColors, productSizes } from "@/lib/products";
+import { api } from "@/lib/api";
+import { buildPageMeta, breadcrumbSchema, jsonLdScript, productSchema } from "@/lib/seo";
 
 export const Route = createFileRoute("/product/$id")({
+  loader: async ({ params }) => {
+    try {
+      return await api.getProduct(params.id);
+    } catch {
+      return null;
+    }
+  },
+  head: ({ loaderData, params }) => {
+    const product = loaderData?.product;
+    if (!product) {
+      return buildPageMeta({
+        title: "Luxury Shoes — Product Not Found",
+        description: "Browse our full collection of premium luxury shoes online.",
+        path: `/product/${params.id}`,
+        noindex: true,
+      });
+    }
+
+    const slug = product.slug || product.id;
+    const title = `${product.name} — Luxury Shoes | ₹${product.price}`;
+    const description =
+      product.description?.slice(0, 155) ||
+      `Buy ${product.name} online at Luxury Shoes. Premium luxury footwear at ₹${product.price} with free shipping and easy returns.`;
+
+    const page = buildPageMeta({
+      title,
+      description,
+      path: `/product/${slug}`,
+      image: product.img,
+      type: "product",
+    });
+
+    return {
+      ...page,
+      scripts: [
+        jsonLdScript(productSchema(product)),
+        jsonLdScript(
+          breadcrumbSchema([
+            { name: "Home", path: "/" },
+            { name: "Luxury Shoes", path: "/search" },
+            { name: product.name, path: `/product/${slug}` },
+          ]),
+        ),
+      ],
+    };
+  },
   component: ProductDetail,
   notFoundComponent: () => (
     <Shell>

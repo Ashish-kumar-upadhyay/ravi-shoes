@@ -6,6 +6,7 @@ import { useProductSearch, useBrands } from "@/hooks/use-products";
 import { useStore, type Product } from "@/lib/store";
 import { Heart, ShoppingBag } from "lucide-react";
 import type { ProductFilters } from "@/lib/api";
+import { buildPageMeta } from "@/lib/seo";
 
 type SearchParams = {
   q?: string;
@@ -21,9 +22,22 @@ export const Route = createFileRoute("/search")({
     brand: typeof s.brand === "string" ? s.brand : undefined,
     collection: typeof s.collection === "string" ? s.collection : undefined,
   }),
-  head: () => ({
-    meta: [{ title: "Search — Treadly" }],
-  }),
+  head: ({ match }) => {
+    const { q, category, brand } = match.search as SearchParams;
+    const label = brand
+      ? `${brand} Luxury Shoes`
+      : q
+        ? `Luxury Shoes — ${q}`
+        : category
+          ? `${category} Luxury Shoes Collection`
+          : "Shop All Luxury Shoes";
+
+    return buildPageMeta({
+      title: `${label} | Luxury Shoes`,
+      description: `Browse ${label.toLowerCase()} at Luxury Shoes. Premium designer footwear with free shipping, easy returns and top brand quality.`,
+      path: "/search",
+    });
+  },
   component: SearchPage,
 });
 

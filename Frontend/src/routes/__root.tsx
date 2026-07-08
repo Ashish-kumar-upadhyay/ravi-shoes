@@ -12,6 +12,14 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { StoreProvider, AuthProvider } from "../lib/store";
+import {
+  buildPageMeta,
+  DEFAULT_DESCRIPTION,
+  DEFAULT_TITLE,
+  jsonLdScript,
+  organizationSchema,
+  websiteSchema,
+} from "../lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -74,26 +82,33 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Treadly — Step Into Shoes Style" },
-      { name: "description", content: "Treadly is a modern sneaker store where fashion meets function. Shop the latest running, lifestyle and sport shoes." },
-      { name: "author", content: "Treadly" },
-      { property: "og:title", content: "Treadly — Step Into Shoes Style" },
-      { property: "og:description", content: "Modern sneaker store where fashion meets function." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" },
-    ],
-  }),
+  head: () => {
+    const page = buildPageMeta({
+      title: DEFAULT_TITLE,
+      description: DEFAULT_DESCRIPTION,
+      path: "/",
+    });
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        ...page.meta,
+      ],
+      links: [
+        ...page.links,
+        { rel: "stylesheet", href: appCss },
+        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap",
+        },
+      ],
+      scripts: [jsonLdScript(organizationSchema()), jsonLdScript(websiteSchema())],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

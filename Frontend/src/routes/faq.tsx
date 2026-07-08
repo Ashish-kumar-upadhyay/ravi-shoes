@@ -2,45 +2,51 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shell } from "@/components/site-shell";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-
-export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      { title: "FAQ — Treadly" },
-      { name: "description", content: "Find answers to your Treadly questions about orders, shipping, returns, and sizing." },
-      { property: "og:title", content: "FAQ — Treadly" },
-      { property: "og:description", content: "Find answers to your Treadly questions about orders, shipping, returns, and sizing." },
-    ],
-  }),
-  component: FaqPage,
-});
+import { buildPageMeta, faqSchema, jsonLdScript } from "@/lib/seo";
 
 const faqs = [
   {
-    q: "How do I choose the right shoe size?",
-    a: "We recommend measuring your foot length and comparing it to our size chart. If you are between sizes, size up for a more comfortable fit. Our EU sizes are clearly listed on every product page.",
+    q: "How do I choose the right luxury shoe size?",
+    a: "We recommend measuring your foot length and comparing it to our size chart. If you are between sizes, size up for a more comfortable fit. Our EU sizes are clearly listed on every luxury shoes product page.",
   },
   {
-    q: "What is your return policy?",
-    a: "You can return any unworn shoes within 30 days of delivery for a full refund or exchange. Items must be in their original packaging with tags attached.",
+    q: "What is your return policy for luxury shoes?",
+    a: "You can return any unworn luxury shoes within 30 days of delivery for a full refund or exchange. Items must be in their original packaging with tags attached.",
   },
   {
-    q: "Do you offer free shipping?",
-    a: "Yes, we offer free standard shipping on all orders. Express delivery is available at checkout for an additional fee.",
+    q: "Do you offer free shipping on luxury shoes?",
+    a: "Yes, we offer free standard shipping on all luxury shoes orders across India. Express delivery is available at checkout for an additional fee.",
   },
   {
     q: "How long does delivery take?",
-    a: "Standard shipping usually takes 5-7 business days. Express orders arrive within 2-3 business days. Tracking details are sent once your order ships.",
+    a: "Standard shipping usually takes 5-7 business days. Express orders arrive within 2-3 business days. Tracking details are sent once your luxury shoes order ships.",
   },
   {
     q: "Can I change or cancel my order?",
     a: "Orders can be modified or cancelled within 1 hour of placing them. Contact our support team immediately for help.",
   },
   {
-    q: "Are Treadly shoes true to size?",
-    a: "Most of our styles run true to size. For wider feet, we suggest choosing a half size up or checking the product-specific fit notes.",
+    q: "Are Luxury Shoes true to size?",
+    a: "Most of our premium luxury shoes run true to size. For wider feet, we suggest choosing a half size up or checking the product-specific fit notes.",
   },
 ];
+
+export const Route = createFileRoute("/faq")({
+  head: () => {
+    const page = buildPageMeta({
+      title: "Luxury Shoes FAQ — Shipping, Returns & Sizing",
+      description:
+        "Find answers about luxury shoes orders, free shipping, 30-day returns, sizing guides and delivery at Luxury Shoes.",
+      path: "/faq",
+    });
+
+    return {
+      ...page,
+      scripts: [jsonLdScript(faqSchema(faqs))],
+    };
+  },
+  component: FaqPage,
+});
 
 function FaqPage() {
   const [open, setOpen] = useState<number | null>(0);
@@ -50,11 +56,11 @@ function FaqPage() {
       <div className="px-6 py-10 md:px-10">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="font-display text-4xl font-extrabold tracking-tight md:text-5xl">
-            Frequently Asked Questions
+            Luxury Shoes — Frequently Asked Questions
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-sm text-neutral-600">
-            Have a question? We have answers. If you cannot find what you are looking for, feel free to
-            contact our support team.
+            Have a question about our luxury shoes? We have answers. If you cannot find what you are
+            looking for, feel free to contact our support team.
           </p>
         </div>
 
@@ -90,7 +96,7 @@ function FaqPage() {
         <div className="mx-auto mt-10 max-w-2xl rounded-2xl bg-neutral-900 px-6 py-8 text-center text-white">
           <p className="font-display text-lg font-bold">Still need help?</p>
           <p className="mt-2 text-xs text-neutral-300">
-            Our support team is available 24/7 to answer your questions.
+            Our support team is available 24/7 to answer your luxury shoes questions.
           </p>
           <button className="mt-4 rounded-full bg-white px-5 py-2 text-sm font-semibold text-neutral-900 transition hover:bg-neutral-200">
             Contact Support

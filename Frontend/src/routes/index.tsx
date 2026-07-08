@@ -21,8 +21,31 @@ import collection3 from "@/assets/collection-3.jpg";
 import { Shell } from "@/components/site-shell";
 import { useStore, type Product } from "@/lib/store";
 import { useProducts, useBestsellers, useNewArrivals } from "@/hooks/use-products";
+import { buildPageMeta, jsonLdScript, SITE_NAME } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
+  head: () => {
+    const page = buildPageMeta({
+      title: "Luxury Shoes — Shop Premium Designer Footwear Online",
+      description:
+        "Discover the finest luxury shoes for men, women and children. Shop premium designer sneakers, formal shoes and running footwear with free shipping at Luxury Shoes.",
+      path: "/",
+    });
+
+    return {
+      ...page,
+      scripts: [
+        jsonLdScript({
+          "@context": "https://schema.org",
+          "@type": "Store",
+          name: SITE_NAME,
+          description:
+            "Online luxury shoe store offering premium designer footwear, sneakers, formal shoes and running shoes.",
+          url: page.links[0]?.href,
+        }),
+      ],
+    };
+  },
   component: Index,
 });
 
@@ -91,9 +114,9 @@ function ProductCard({ product }: { product: Product }) {
 
 const slides = [
   {
-    tag: "AIR FORCE",
-    title: ["STEP INTO", "SHOES STYLE"],
-    caption: "Step into a world where fashion meets function, and walk with confidence in every step!",
+    tag: "LUXURY SHOES",
+    title: ["SHOP LUXURY", "SHOES ONLINE"],
+    caption: "Premium designer footwear for every step — sneakers, formal and running luxury shoes delivered to your door.",
     watermark: "OWN THE WALK",
     img: heroShoe,
     era: "2025 – PRESENT",
@@ -552,6 +575,50 @@ function Index() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="px-6 pb-16 md:px-10">
+        <div className="mx-auto max-w-4xl rounded-3xl bg-white p-8 ring-1 ring-black/5 md:p-10">
+          <h2 className="font-display text-2xl font-bold md:text-3xl">
+            India&apos;s Trusted Online Store for Luxury Shoes
+          </h2>
+          <p className="mt-4 text-sm leading-relaxed text-neutral-600 md:text-base">
+            Welcome to Luxury Shoes — your destination for premium designer footwear. We curate the
+            best luxury shoes from world-renowned brands including Nike, Adidas, PUMA, New Balance
+            and more. Whether you are looking for men&apos;s luxury shoes, women&apos;s designer
+            sneakers, children&apos;s premium footwear, or formal luxury shoes for special occasions,
+            our collection is built for style, comfort and lasting quality.
+          </p>
+          <p className="mt-4 text-sm leading-relaxed text-neutral-600 md:text-base">
+            Every pair in our luxury shoes catalog is selected for superior craftsmanship, premium
+            materials and modern design. Shop bestsellers, new arrivals and exclusive collections
+            with free shipping, easy 30-day returns, and secure checkout. Step into confidence with
+            Luxury Shoes — where premium footwear meets exceptional value.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link
+              to="/search"
+              search={{ category: "Men" }}
+              className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+            >
+              Men&apos;s Luxury Shoes
+            </Link>
+            <Link
+              to="/search"
+              search={{ category: "Woman" }}
+              className="rounded-full bg-neutral-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-500"
+            >
+              Women&apos;s Luxury Shoes
+            </Link>
+            <Link
+              to="/search"
+              search={{ category: "Popular" }}
+              className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold ring-1 ring-black/10 transition hover:bg-neutral-100"
+            >
+              Popular Luxury Shoes
+            </Link>
+          </div>
         </div>
       </section>
     </Shell>

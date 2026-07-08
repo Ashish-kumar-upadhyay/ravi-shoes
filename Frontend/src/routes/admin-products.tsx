@@ -2,11 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShoppingBag, Package, Users, LayoutDashboard, TrendingUp, Settings, Menu, X, Plus, Edit, Trash2, Search, Upload, X as XIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { API_URL } from "@/lib/api";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin-products")({
-  head: () => ({
-    meta: [{ title: "Products — Treadly Admin" }, { name: "description", content: "Manage products in Treadly admin panel" }],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Admin Products — Luxury Shoes",
+      description: "Manage products.",
+      path: "/admin-products",
+      noindex: true,
+    }),
   component: AdminProducts,
 });
 

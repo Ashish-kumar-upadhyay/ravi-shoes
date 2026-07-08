@@ -73,13 +73,13 @@ export function SiteHeader() {
 
   return (
     <>
-      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5 md:px-10">
+      <header className="grid grid-cols-[auto_1fr_auto] items-center gap-3 px-4 py-4 sm:px-6 sm:py-5 md:px-10">
         <IconBtn to="/admin-login" ariaLabel="Admin login">
           <Shield className="h-4 w-4" />
         </IconBtn>
         <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold md:col-start-2 md:justify-self-center">
           <Footprints className="h-4 w-4" />
-          Treadly
+          Luxury Shoes
         </Link>
         <div className="col-start-3 flex items-center gap-2 justify-self-end">
           <IconBtn to="/favorites" ariaLabel="Favorites" count={favCount}>
@@ -105,9 +105,9 @@ export function SiteHeader() {
             </IconBtn>
           )}
         </div>
-      </div>
+      </header>
 
-      <div className="flex min-w-0 flex-col gap-2 px-4 pb-4 sm:px-6 sm:pb-6 md:flex-row md:flex-wrap md:items-center md:px-10">
+      <nav aria-label="Main navigation" className="flex min-w-0 flex-col gap-2 px-4 pb-4 sm:px-6 sm:pb-6 md:flex-row md:flex-wrap md:items-center md:px-10">
         {/* Search + About + FAQ (first on mobile, inline on desktop) */}
         <div className="order-1 flex min-w-0 items-center gap-2 md:order-2 md:flex-1">
           <div className="flex min-w-0 flex-1 items-center gap-2 rounded-full bg-neutral-100 px-4 py-2 transition focus-within:bg-white focus-within:ring-1 focus-within:ring-neutral-900">
@@ -148,7 +148,7 @@ export function SiteHeader() {
             </Pill>
           ))}
         </div>
-      </div>
+      </nav>
     </>
   );
 }
@@ -160,25 +160,56 @@ export function SiteFooter() {
         <div className="col-span-2 sm:col-span-3 lg:col-span-2">
           <div className="flex items-center gap-2 font-display text-lg font-bold">
             <Footprints className="h-4 w-4" />
-            Treadly
+            Luxury Shoes
           </div>
           <p className="mt-3 max-w-xs text-xs text-neutral-600">
-            Best fabric selection, personalized creativity, and innovative solutions to clothe you
-            always.
+            India&apos;s trusted online store for premium luxury shoes, designer sneakers and formal
+            footwear from top global brands.
           </p>
         </div>
         {[
-          { title: "About", links: ["Community", "Leadership", "Press", "Careers"] },
-          { title: "Help", links: ["Help Center", "Support Team", "Contact", "FAQs"] },
-          { title: "Menu", links: ["Men", "Woman", "Children", "Popular"] },
-          { title: "Company", links: ["About Treadly", "Careers", "Contact", "Terms"] },
+          {
+            title: "Shop",
+            links: [
+              { label: "Men's Luxury Shoes", to: "/search" as const, search: { category: "Men" } },
+              { label: "Women's Luxury Shoes", to: "/search" as const, search: { category: "Woman" } },
+              { label: "Children's Shoes", to: "/search" as const, search: { category: "Children" } },
+              { label: "Popular Collection", to: "/search" as const, search: { category: "Popular" } },
+            ],
+          },
+          {
+            title: "Help",
+            links: [
+              { label: "FAQ", to: "/faq" as const },
+              { label: "About Us", to: "/about" as const },
+              { label: "Contact", to: "/faq" as const },
+            ],
+          },
+          {
+            title: "Brands",
+            links: [
+              { label: "Nike Luxury Shoes", to: "/search" as const, search: { brand: "Nike" } },
+              { label: "Adidas Shoes", to: "/search" as const, search: { brand: "adidas" } },
+              { label: "PUMA Shoes", to: "/search" as const, search: { brand: "PUMA" } },
+            ],
+          },
+          {
+            title: "Company",
+            links: [
+              { label: "About Luxury Shoes", to: "/about" as const },
+              { label: "Privacy Policy", to: "/about" as const },
+              { label: "Terms", to: "/about" as const },
+            ],
+          },
         ].map((col) => (
           <div key={col.title}>
             <p className="font-display text-sm font-bold">{col.title}</p>
             <ul className="mt-3 space-y-2 text-xs text-neutral-600">
               {col.links.map((l) => (
-                <li key={l} className="cursor-pointer transition hover:text-neutral-900">
-                  {l}
+                <li key={l.label}>
+                  <Link to={l.to} search={"search" in l ? l.search : undefined} className="transition hover:text-neutral-900">
+                    {l.label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -186,8 +217,10 @@ export function SiteFooter() {
         ))}
       </div>
       <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-black/10 pt-6 text-xs text-neutral-500 md:flex-row">
-        <p>Copyright © 2025 Treadly. All Rights Reserved.</p>
-        <p>Privacy Policy</p>
+        <p>Copyright © 2026 Luxury Shoes. All Rights Reserved.</p>
+        <Link to="/about" className="transition hover:text-neutral-900">
+          Privacy Policy
+        </Link>
       </div>
     </footer>
   );
@@ -198,7 +231,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-[#efeeea] font-sans text-neutral-900">
       <div className="bg-white">
         <SiteHeader />
-        <div className="animate-[fadeIn_0.4s_ease-out]">{children}</div>
+        <main className="animate-[fadeIn_0.4s_ease-out]">{children}</main>
         <SiteFooter />
       </div>
       <style>{`

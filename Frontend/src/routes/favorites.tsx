@@ -2,9 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
 import { Shell } from "@/components/site-shell";
 import { useStore } from "@/lib/store";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/favorites")({
-  head: () => ({ meta: [{ title: "Favorites — Treadly" }] }),
+  head: () =>
+    buildPageMeta({
+      title: "Favorites — Luxury Shoes",
+      description: "Your saved luxury shoes.",
+      path: "/favorites",
+      noindex: true,
+    }),
   component: FavPage,
 });
 

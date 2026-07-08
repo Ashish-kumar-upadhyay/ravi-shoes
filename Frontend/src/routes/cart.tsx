@@ -4,9 +4,16 @@ import { useState } from "react";
 import { Shell } from "@/components/site-shell";
 import { useStore, useAuth } from "@/lib/store";
 import { api } from "@/lib/api";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/cart")({
-  head: () => ({ meta: [{ title: "Your Cart — Treadly" }] }),
+  head: () =>
+    buildPageMeta({
+      title: "Your Cart — Luxury Shoes",
+      description: "Review luxury shoes in your cart.",
+      path: "/cart",
+      noindex: true,
+    }),
   component: CartPage,
 });
 

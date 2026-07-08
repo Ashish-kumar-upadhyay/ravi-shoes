@@ -2,10 +2,16 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShoppingBag, Package, Users, LayoutDashboard, TrendingUp, Settings, Menu, X, DollarSign, ArrowUpRight, ArrowDownRight, Calendar, BarChart3, PieChart, Users as UsersIcon } from "lucide-react";
 import { useState } from "react";
 
+import { buildPageMeta } from "@/lib/seo";
+
 export const Route = createFileRoute("/admin-analytics")({
-  head: () => ({
-    meta: [{ title: "Analytics — Treadly Admin" }, { name: "description", content: "View analytics and metrics in Treadly admin panel" }],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Admin Analytics — Luxury Shoes",
+      description: "View analytics.",
+      path: "/admin-analytics",
+      noindex: true,
+    }),
   component: AdminAnalytics,
 });
 

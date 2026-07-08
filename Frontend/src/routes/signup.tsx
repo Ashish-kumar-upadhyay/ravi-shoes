@@ -3,14 +3,16 @@ import { Lock, Mail, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import heroShoe from "@/assets/hero-shoe.png";
 import { useAuth } from "@/lib/store";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/signup")({
-  head: () => ({
-    meta: [
-      { title: "Create Account — Treadly" },
-      { name: "description", content: "Create a Treadly account" },
-    ],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Create Account — Luxury Shoes",
+      description: "Create your Luxury Shoes account to shop premium footwear.",
+      path: "/signup",
+      noindex: true,
+    }),
   component: SignupPage,
 });
 

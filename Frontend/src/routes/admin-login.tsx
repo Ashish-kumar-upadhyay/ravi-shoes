@@ -3,11 +3,16 @@ import { Lock, Mail, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
 import { useState } from "react";
 import heroShoe from "@/assets/hero-shoe.png";
 import { API_URL } from "@/lib/api";
+import { buildPageMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin-login")({
-  head: () => ({
-    meta: [{ title: "Admin Sign In — Treadly" }, { name: "description", content: "Admin sign in to Treadly" }],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Admin Sign In — Luxury Shoes",
+      description: "Admin sign in.",
+      path: "/admin-login",
+      noindex: true,
+    }),
   component: AdminLoginPage,
 });
 

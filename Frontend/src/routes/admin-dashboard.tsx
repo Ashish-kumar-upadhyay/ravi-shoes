@@ -2,10 +2,16 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shield, Users, ShoppingBag, Package, LogOut, LayoutDashboard, TrendingUp, Settings, Menu, X, DollarSign, Repeat2, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { useState } from "react";
 
+import { buildPageMeta } from "@/lib/seo";
+
 export const Route = createFileRoute("/admin-dashboard")({
-  head: () => ({
-    meta: [{ title: "Admin Dashboard — Treadly" }, { name: "description", content: "Admin dashboard for Treadly" }],
-  }),
+  head: () =>
+    buildPageMeta({
+      title: "Admin Dashboard — Luxury Shoes",
+      description: "Admin dashboard.",
+      path: "/admin-dashboard",
+      noindex: true,
+    }),
   component: AdminDashboard,
 });
 

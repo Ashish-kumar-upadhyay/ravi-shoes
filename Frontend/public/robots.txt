@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /admin-login
+Disallow: /admin-dashboard
+Disallow: /admin-products
+Disallow: /admin-orders
+Disallow: /admin-analytics
+Disallow: /admin-settings
+Disallow: /login
+Disallow: /signup
+Disallow: /cart
+Disallow: /favorites
+
+Sitemap: https://luxuryshoes.dpdns.org/sitemap.xml
