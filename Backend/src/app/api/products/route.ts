@@ -5,15 +5,12 @@ import { Product } from "@/models/Product";
 import { jsonOk, jsonError, handleOptions } from "@/lib/auth";
 import { formatProduct } from "@/lib/format";
 import { buildProductFilter } from "@/lib/product-filters";
+import { normalizeImgForStorage } from "@/lib/url";
 
 export { handleOptions as OPTIONS };
 
-const API_BASE = process.env.API_URL || "http://localhost:5000";
-
 function normalizeImgUrl(img?: string) {
-  if (!img) return img;
-  if (img.startsWith(API_BASE)) return img.slice(API_BASE.length);
-  return img;
+  return normalizeImgForStorage(img);
 }
 
 function slugify(name: string) {

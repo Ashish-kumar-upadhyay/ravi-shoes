@@ -5,6 +5,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
+  imageUrlsFixed?: boolean;
 }
 
 declare global {
@@ -29,5 +30,13 @@ export async function connectDB() {
   }
 
   cached.conn = await cached.promise;
+
+  if (!cached.imageUrlsFixed) {
+    cached.imageUrlsFixed = true;
+    import("@/lib/fix-images")
+      .then(({ fixStoredImageUrls }) => fixStoredImageUrls())
+      .catch((err) => console.error("Image URL migration error:", err));
+  }
+
   return cached.conn;
 }

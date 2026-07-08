@@ -1,5 +1,6 @@
 import mongoose, { Schema, models, model } from "mongoose";
 import type { IProduct } from "@/types";
+import { normalizeImgForStorage } from "@/lib/url";
 
 const ColorSchema = new Schema(
   {
@@ -41,5 +42,11 @@ ProductSchema.index({ category: 1 });
 ProductSchema.index({ isBestSeller: 1 });
 ProductSchema.index({ isNewArrival: 1 });
 ProductSchema.index({ brand: 1 });
+
+ProductSchema.pre("save", function () {
+  if (this.img) {
+    this.img = normalizeImgForStorage(this.img) ?? this.img;
+  }
+});
 
 export const Product = models.Product || model<IProduct>("Product", ProductSchema);

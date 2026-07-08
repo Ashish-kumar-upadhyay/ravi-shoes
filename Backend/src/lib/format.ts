@@ -1,15 +1,13 @@
 import type { IProduct } from "@/types";
+import { resolveImgUrl } from "@/lib/url";
 
 export function formatProduct(doc: IProduct & { _id?: unknown }) {
-  const baseUrl = process.env.API_URL || "http://localhost:5000";
-  const imgUrl = doc.img.startsWith('/') ? `${baseUrl}${doc.img}` : doc.img;
-  
   return {
     id: doc.slug,
     slug: doc.slug,
     name: doc.name,
     price: doc.price,
-    img: imgUrl,
+    img: resolveImgUrl(doc.img),
     description: doc.description,
     category: doc.category,
     collection: doc.collection,
