@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { buildCorsHeaders } from "@/lib/cors";
 import { NextRequest } from "next/server";
 import { User } from "@/models/User";
 import type { IUser } from "@/types";
@@ -48,6 +49,9 @@ export function jsonError(message: string, status = 400) {
   return Response.json({ success: false, message }, { status });
 }
 
-export async function handleOptions() {
-  return new Response(null, { status: 204 });
+export async function handleOptions(request: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: buildCorsHeaders(request.headers.get("origin")),
+  });
 }
