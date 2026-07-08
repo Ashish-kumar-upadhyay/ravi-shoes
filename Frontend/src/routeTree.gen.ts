@@ -9,8 +9,10 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as FaqRouteImport } from './routes/faq'
@@ -25,6 +27,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductIdRouteImport } from './routes/product.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -33,6 +40,11 @@ const SignupRoute = SignupRouteImport.update({
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -114,8 +126,10 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRoutesByTo {
@@ -131,8 +145,10 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRoutesById {
@@ -149,8 +165,10 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
   '/signup': typeof SignupRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/product/$id': typeof ProductIdRoute
 }
 export interface FileRouteTypes {
@@ -168,8 +186,10 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favorites'
     | '/login'
+    | '/robots.txt'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/product/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -185,8 +205,10 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favorites'
     | '/login'
+    | '/robots.txt'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/product/$id'
   id:
     | '__root__'
@@ -202,8 +224,10 @@ export interface FileRouteTypes {
     | '/faq'
     | '/favorites'
     | '/login'
+    | '/robots.txt'
     | '/search'
     | '/signup'
+    | '/sitemap.xml'
     | '/product/$id'
   fileRoutesById: FileRoutesById
 }
@@ -220,13 +244,22 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   FavoritesRoute: typeof FavoritesRoute
   LoginRoute: typeof LoginRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
   SignupRoute: typeof SignupRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProductIdRoute: typeof ProductIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -239,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -348,8 +388,10 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   FavoritesRoute: FavoritesRoute,
   LoginRoute: LoginRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,
   SignupRoute: SignupRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProductIdRoute: ProductIdRoute,
 }
 export const routeTree = rootRouteImport
