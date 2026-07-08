@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Shield, ShoppingBag, Package, Users, LayoutDashboard, TrendingUp, Settings, Menu, X, Plus, Edit, Trash2, Search, Upload, X as XIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import { API_URL } from "@/lib/api";
 
 export const Route = createFileRoute("/admin-products")({
   head: () => ({
@@ -9,7 +10,6 @@ export const Route = createFileRoute("/admin-products")({
   component: AdminProducts,
 });
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 type AdminProduct = {
   id: string;

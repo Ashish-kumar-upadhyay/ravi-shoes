@@ -3,6 +3,7 @@ import { Lock, Mail, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import heroShoe from "@/assets/hero-shoe.png";
 import { useAuth } from "@/lib/store";
+import { API_URL } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -25,7 +26,7 @@ function LoginPage() {
     setGoogleLoading(true);
     setError("");
     try {
-      const response = await fetch("http://localhost:5000/api/auth/google");
+      const response = await fetch(`${API_URL}/api/auth/google`);
       const data = await response.json();
       
       if (data.success && data.authUrl) {

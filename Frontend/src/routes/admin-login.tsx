@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Lock, Mail, ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
 import { useState } from "react";
 import heroShoe from "@/assets/hero-shoe.png";
+import { API_URL } from "@/lib/api";
 
 export const Route = createFileRoute("/admin-login")({
   head: () => ({
@@ -23,7 +24,7 @@ function AdminLoginPage() {
     setError("");
     setSubmitting(true);
     try {
-      const response = await fetch("http://localhost:5000/api/auth/admin/login", {
+      const response = await fetch(`${API_URL}/api/auth/admin/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
