@@ -2,7 +2,13 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Heart, ShoppingBag, User, Footprints, LogOut, Shield } from "lucide-react";
 import { useAuth, useStore } from "@/lib/store";
 import { NotificationsPanel } from "@/components/notifications-panel";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+
+const InstagramReelsSection = lazy(() =>
+  import("@/components/instagram-reels-section").then((module) => ({
+    default: module.InstagramReelsSection,
+  })),
+);
 
 const nav = ["Men", "Woman", "Children", "New Collection", "Popular"];
 
@@ -232,6 +238,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <div className="bg-white">
         <SiteHeader />
         <main className="animate-[fadeIn_0.4s_ease-out]">{children}</main>
+        <Suspense
+          fallback={
+            <div className="border-t border-black/5 bg-[#efeeea] px-6 py-14 md:px-10">
+              <div className="mx-auto h-72 max-w-7xl animate-pulse rounded-3xl bg-neutral-200/70" />
+            </div>
+          }
+        >
+          <InstagramReelsSection />
+        </Suspense>
         <SiteFooter />
       </div>
       <style>{`
