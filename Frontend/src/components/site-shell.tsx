@@ -241,7 +241,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <Suspense
           fallback={
             <div className="border-t border-black/5 bg-[#efeeea] px-6 py-14 md:px-10">
-              <div className="mx-auto h-72 max-w-7xl animate-pulse rounded-3xl bg-neutral-200/70" />
+              <div className="mx-auto h-[420px] max-w-7xl animate-pulse rounded-3xl bg-neutral-200/70" />
             </div>
           }
         >

@@ -1,9 +1,14 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
-import { ArrowLeft, ArrowRight, Instagram, Play } from "lucide-react";
-import { instagramReels, INSTAGRAM_PROFILE_URL, type InstagramReel } from "@/lib/reels-data";
+import { ArrowLeft, ArrowRight, Instagram, VolumeX, Volume2, Play } from "lucide-react";
+import {
+  cloudinaryPoster,
+  optimizeCloudinaryVideo,
+  reels,
+  type ReelItem,
+} from "@/lib/reels-data";
 
-const AUTOPLAY_MS = 4500;
+const AUTOPLAY_MS = 5000;
 
 function useSlidesPerView() {
   const [count, setCount] = useState(4);
@@ -25,26 +30,91 @@ function useSlidesPerView() {
   return count;
 }
 
-const ReelCard = memo(function ReelCard({ reel }: { reel: InstagramReel }) {
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoReady, setVideoReady] = useState(false);
-  const [videoFailed, setVideoFailed] = useState(false);
+function useInView<T extends HTMLElement>(rootMargin = "120px") {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
 
   useEffect(() => {
-    const card = cardRef.current;
-    const video = videoRef.current;
-    if (!card || !video) return;
+    const node = ref.current;
+    if (!node) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => undefined);
-        } else {
+        if (entry.isIntersecting) setInView(true);
+      },
+      { rootMargin, threshold: 0.12 },
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [rootMargin]);
+
+  return { ref, inView };
+}
+
+const ReelCard = memo(function ReelCard({ reel }: { reel: ReelItem }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  // Use raw URL without optimization to ensure it works
+  const streamUrl = reel.videoUrl;
+  const posterUrl = cloudinaryPoster(reel.videoUrl);
+
+  const toggleMute = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
+    
+    if (!video.muted && video.paused) {
+      video.play().catch(() => undefined);
+    }
+  };
+
+  const handleVideoClick = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    if (video.paused) {
+      video.play().catch((err) => console.log("Play error:", err));
+    } else {
+      video.pause();
+    }
+  };
+
+  const handlePlayClick = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    video.muted = true;
+    setIsMuted(true);
+    video.playbackRate = 1.0; // Ensure normal speed
+    video.play().catch((err) => console.log("Play error:", err));
+  };
+
+  const handleError = () => {
+    console.error("Video failed to load:", reel.videoUrl);
+    setHasError(true);
+  };
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (!entry.isIntersecting) {
           video.pause();
         }
       },
-      { threshold: 0.45 },
+      { threshold: 0.5 },
     );
 
     observer.observe(card);
@@ -52,73 +122,96 @@ const ReelCard = memo(function ReelCard({ reel }: { reel: InstagramReel }) {
   }, []);
 
   return (
-    <a
+    <article
       ref={cardRef}
-      href={reel.instagramUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      aria-label={`Watch ${reel.title} on Instagram`}
-      className="group reel-card block h-full"
+      className="group reel-card h-full"
+      aria-label={reel.title}
     >
-      <div className="relative h-full overflow-hidden rounded-[1.35rem] border border-white/30 bg-white/20 p-2 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.35)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:shadow-[0_28px_60px_-18px_rgba(249,115,22,0.35)]">
+      <div className="relative h-full overflow-hidden rounded-[1.35rem] border border-white/40 bg-white/25 p-2 shadow-[0_18px_45px_-22px_rgba(0,0,0,0.45)] backdrop-blur-xl transition duration-500 will-change-transform hover:-translate-y-1.5 hover:shadow-[0_26px_55px_-20px_rgba(249,115,22,0.38)]">
         <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-neutral-900">
-          {!videoFailed && (
+          <img
+            src={posterUrl}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            decoding="async"
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+              isPlaying ? "opacity-0" : "opacity-100"
+            }`}
+          />
+
+          {!hasError && (
             <video
               ref={videoRef}
-              src={reel.previewVideo}
-              poster={reel.poster}
-              muted
+              src={streamUrl}
+              poster={posterUrl}
+              muted={isMuted}
               loop
               playsInline
-              autoPlay
-              preload="metadata"
-              onLoadedData={() => setVideoReady(true)}
-              onError={() => setVideoFailed(true)}
-              className={`h-full w-full object-cover transition duration-700 group-hover:scale-105 ${
-                videoReady ? "opacity-100" : "opacity-0"
-              }`}
+              preload="auto"
+              onPlaying={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              onError={handleError}
+              onClick={handleVideoClick}
+              className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04] cursor-pointer"
             />
           )}
-
-          {(videoFailed || !videoReady) && (
-            <div
-              className="absolute inset-0 bg-cover bg-center transition duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url(${reel.poster})` }}
-              role="img"
-              aria-label={reel.title}
-            />
+          
+          {!isPlaying && !hasError && (
+            <button
+              onClick={handlePlayClick}
+              className="absolute inset-0 flex items-center justify-center bg-black/20 transition hover:bg-black/30"
+              aria-label="Play video"
+            >
+              <div className="grid h-14 w-14 place-items-center rounded-full bg-white/90 text-neutral-900 shadow-lg backdrop-blur-sm transition hover:scale-110">
+                <Play className="h-6 w-6 fill-current" />
+              </div>
+            </button>
+          )}
+          
+          {hasError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-neutral-900 text-white">
+              <p className="text-xs">Video unavailable</p>
+            </div>
           )}
 
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
 
-          <div className="absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-white/15 text-white backdrop-blur-md ring-1 ring-white/25">
-            <Instagram className="h-4 w-4" aria-hidden />
+          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-white backdrop-blur-md ring-1 ring-white/20">
+            <Instagram className="h-3.5 w-3.5" aria-hidden />
+            Reel
           </div>
 
-          <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-            <p className="line-clamp-2 text-xs font-semibold text-white">{reel.title}</p>
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/90 text-neutral-900 shadow-lg transition group-hover:scale-110">
-              <Play className="h-3.5 w-3.5 fill-current" aria-hidden />
-            </span>
+          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
+            <p className="text-xs font-medium text-white/90">{reel.title}</p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleMute();
+              }}
+              className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-black/35 text-white backdrop-blur-sm transition hover:bg-black/50"
+              aria-label={isMuted ? "Unmute" : "Mute"}
+            >
+              {isMuted ? <VolumeX className="h-3.5 w-3.5" aria-hidden /> : <Volume2 className="h-3.5 w-3.5" aria-hidden />}
+            </button>
           </div>
         </div>
       </div>
-    </a>
+    </article>
   );
 });
 
 export function InstagramReelsSection() {
   const slidesPerView = useSlidesPerView();
+  const { ref: sectionRef, inView: sectionVisible } = useInView<HTMLElement>("80px");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [canScrollPrev, setCanScrollPrev] = useState(false);
-  const [canScrollNext, setCanScrollNext] = useState(false);
   const autoplayRef = useRef<number | null>(null);
 
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: "start",
     loop: true,
     dragFree: false,
-    skipSnaps: false,
+    containScroll: "trimSnaps",
   });
 
   const slideSize = `${100 / slidesPerView}%`;
@@ -126,8 +219,6 @@ export function InstagramReelsSection() {
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setSelectedIndex(emblaApi.selectedScrollSnap());
-    setCanScrollPrev(emblaApi.canScrollPrev());
-    setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
 
   useEffect(() => {
@@ -143,11 +234,11 @@ export function InstagramReelsSection() {
 
   useEffect(() => {
     if (!emblaApi) return;
-    emblaApi.reInit({ loop: true });
+    emblaApi.reInit({ loop: true, align: "start", containScroll: "trimSnaps" });
   }, [emblaApi, slidesPerView]);
 
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || !sectionVisible) return;
 
     const startAutoplay = () => {
       if (autoplayRef.current) window.clearInterval(autoplayRef.current);
@@ -166,7 +257,7 @@ export function InstagramReelsSection() {
     return () => {
       if (autoplayRef.current) window.clearInterval(autoplayRef.current);
     };
-  }, [emblaApi]);
+  }, [emblaApi, sectionVisible]);
 
   useEffect(() => {
     const viewport = emblaApi?.rootNode();
@@ -175,24 +266,18 @@ export function InstagramReelsSection() {
     const onWheel = (event: WheelEvent) => {
       if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
       event.preventDefault();
-      if (event.deltaY > 0) emblaApi.scrollNext();
-      else emblaApi.scrollPrev();
+      if (event.deltaY > 0) emblaApi?.scrollNext();
+      else emblaApi?.scrollPrev();
     };
 
     viewport.addEventListener("wheel", onWheel, { passive: false });
     return () => viewport.removeEventListener("wheel", onWheel);
   }, [emblaApi]);
 
-  const scrollTo = useCallback(
-    (index: number) => {
-      emblaApi?.scrollTo(index);
-    },
-    [emblaApi],
-  );
-
   return (
     <section
-      aria-labelledby="instagram-reels-heading"
+      ref={sectionRef}
+      aria-labelledby="our-reels-heading"
       tabIndex={0}
       onKeyDown={(event) => {
         if (event.key === "ArrowLeft") {
@@ -204,63 +289,67 @@ export function InstagramReelsSection() {
           emblaApi?.scrollNext();
         }
       }}
-      className="relative overflow-hidden border-t border-black/5 bg-[#efeeea] px-4 py-14 sm:px-6 md:px-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/30"
+      className={`relative overflow-hidden border-t border-black/5 bg-[#efeeea] px-4 py-14 transition-all duration-700 ease-out will-change-transform sm:px-6 md:px-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 ${
+        sectionVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
+      }`}
     >
-      <div className="pointer-events-none absolute -left-20 top-0 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-neutral-900/5 blur-3xl" />
+      <div className="pointer-events-none absolute -left-24 top-8 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-neutral-900/5 blur-3xl" />
 
       <div className="relative mx-auto max-w-7xl">
-        <div className="mb-8 flex flex-col items-start justify-between gap-4 md:flex-row md:items-end">
-          <div className="reels-header">
-            <a
-              href={INSTAGRAM_PROFILE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-neutral-700 shadow-sm ring-1 ring-black/5 backdrop-blur-md transition hover:bg-neutral-900 hover:text-white"
-            >
-              <Instagram className="h-4 w-4" aria-hidden />
-              Follow us on Instagram
-            </a>
+        <div className="mb-8 flex flex-col items-start justify-between gap-5 md:flex-row md:items-end">
+          <div>
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-neutral-500">
+              Luxury Shoes
+            </p>
             <h2
-              id="instagram-reels-heading"
+              id="our-reels-heading"
               className="font-display text-3xl font-extrabold tracking-tight text-neutral-900 md:text-4xl"
             >
-              Luxury Reels
+              Our Reels
             </h2>
-            <p className="reels-underline mt-2 max-w-xl text-sm text-neutral-600">
-              Watch our latest luxury shoe drops — preview here, tap any reel to open on Instagram.
+            <p className="reels-accent-line mt-3 max-w-lg text-sm leading-relaxed text-neutral-600">
+              Scroll through our latest luxury footwear moments — smooth previews streamed in
+              premium quality.
             </p>
           </div>
 
-          <div className="hidden items-center gap-2 md:flex">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => emblaApi?.scrollPrev()}
-              disabled={!canScrollPrev}
-              aria-label="Previous reels"
-              className="grid h-11 w-11 place-items-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 transition hover:bg-neutral-900 hover:text-white disabled:opacity-40"
+              aria-label="Previous reel"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 transition hover:bg-neutral-900 hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => emblaApi?.scrollNext()}
-              disabled={!canScrollNext}
-              aria-label="Next reels"
-              className="grid h-11 w-11 place-items-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 transition hover:bg-neutral-900 hover:text-white disabled:opacity-40"
+              aria-label="Next reel"
+              className="grid h-11 w-11 place-items-center rounded-full bg-white text-neutral-900 shadow-lg ring-1 ring-black/10 transition hover:bg-neutral-900 hover:text-white"
             >
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
 
-        <div ref={emblaRef} className="overflow-hidden" role="region" aria-roledescription="carousel" aria-label="Instagram reels">
-          <div className="flex touch-pan-y">
-            {instagramReels.map((reel) => (
+        <div
+          ref={emblaRef}
+          className="reels-viewport overflow-hidden"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label="Our reels carousel"
+        >
+          <div className="flex touch-pan-y snap-x snap-mandatory">
+            {reels.map((reel, index) => (
               <div
                 key={reel.id}
-                className="min-w-0 px-2"
-                style={{ flex: `0 0 ${slideSize}` }}
+                className="min-w-0 snap-start px-2"
+                style={{
+                  flex: `0 0 ${slideSize}`,
+                  animationDelay: `${index * 80}ms`,
+                }}
               >
                 <ReelCard reel={reel} />
               </div>
@@ -268,76 +357,56 @@ export function InstagramReelsSection() {
           </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 md:hidden">
-            <button
-              type="button"
-              onClick={() => emblaApi?.scrollPrev()}
-              aria-label="Previous reels"
-              className="grid h-10 w-10 place-items-center rounded-full bg-white ring-1 ring-black/10"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => emblaApi?.scrollNext()}
-              aria-label="Next reels"
-              className="grid h-10 w-10 place-items-center rounded-full bg-white ring-1 ring-black/10"
-            >
-              <ArrowRight className="h-4 w-4" />
-            </button>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2" role="tablist" aria-label="Reels pagination">
-            {instagramReels.map((reel, index) => {
-              const active = selectedIndex % instagramReels.length === index;
-              return (
-                <button
-                  key={reel.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={active}
-                  aria-label={`Go to reel ${index + 1}`}
-                  onClick={() => scrollTo(index)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    active ? "w-8 bg-neutral-900" : "w-2.5 bg-neutral-300 hover:bg-neutral-500"
-                  }`}
-                />
-              );
-            })}
-          </div>
+        <div
+          className="mt-6 flex items-center justify-center gap-2"
+          role="tablist"
+          aria-label="Reels pagination"
+        >
+          {reels.map((reel, index) => {
+            const active = selectedIndex % reels.length === index;
+            return (
+              <button
+                key={reel.id}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                aria-label={`Go to reel ${index + 1}`}
+                onClick={() => emblaApi?.scrollTo(index)}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  active ? "w-8 bg-neutral-900" : "w-2 bg-neutral-300 hover:bg-neutral-500"
+                }`}
+              />
+            );
+          })}
         </div>
       </div>
 
       <style>{`
-        .reels-underline {
+        .reels-viewport {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .reels-viewport::-webkit-scrollbar {
+          display: none;
+        }
+        .reels-accent-line {
           position: relative;
           display: inline-block;
         }
-        .reels-underline::after {
+        .reels-accent-line::after {
           content: "";
           position: absolute;
           left: 0;
-          bottom: -8px;
-          width: 72px;
+          bottom: -10px;
+          width: 64px;
           height: 3px;
           border-radius: 999px;
           background: linear-gradient(90deg, #f97316, #171717);
-          animation: reelsUnderline 2.4s ease-in-out infinite;
+          animation: reelsLinePulse 2.6s ease-in-out infinite;
         }
-        @keyframes reelsUnderline {
+        @keyframes reelsLinePulse {
           0%, 100% { transform: scaleX(1); opacity: 1; }
-          50% { transform: scaleX(1.35); opacity: 0.75; }
-        }
-        .reels-header {
-          animation: reelsFadeUp 0.7s ease-out both;
-        }
-        .reel-card {
-          animation: reelsFadeUp 0.7s ease-out both;
-        }
-        @keyframes reelsFadeUp {
-          from { opacity: 0; transform: translateY(16px); }
-          to { opacity: 1; transform: translateY(0); }
+          50% { transform: scaleX(1.25); opacity: 0.72; }
         }
       `}</style>
     </section>

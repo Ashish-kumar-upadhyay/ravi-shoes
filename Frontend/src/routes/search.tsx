@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Shell } from "@/components/site-shell";
+import { AnimatedAddToCartButton } from "@/components/AnimatedAddToCartButton";
 import { ProductFiltersPanel } from "@/components/product-filters";
 import { useProductSearch, useBrands } from "@/hooks/use-products";
 import { useStore, type Product } from "@/lib/store";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Heart } from "lucide-react";
 import type { ProductFilters } from "@/lib/api";
 import { buildPageMeta } from "@/lib/seo";
 
@@ -71,12 +72,12 @@ function ProductCard({ product }: { product: Product }) {
           </div>
         </Link>
       </div>
-      <button
-        onClick={() => addToCart(product)}
+      <AnimatedAddToCartButton
+        product={product}
+        onAddToCart={addToCart}
+        variant="compact"
         className="mt-2 flex items-center justify-center gap-1 rounded-full bg-neutral-900 py-2 text-xs font-semibold text-white hover:bg-orange-500"
-      >
-        Add <ShoppingBag className="h-3 w-3" />
-      </button>
+      />
     </div>
   );
 }

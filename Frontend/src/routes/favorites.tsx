@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Heart, ShoppingBag, ArrowRight } from "lucide-react";
+import { Heart, ArrowRight } from "lucide-react";
 import { Shell } from "@/components/site-shell";
+import { AnimatedAddToCartButton } from "@/components/AnimatedAddToCartButton";
 import { useStore } from "@/lib/store";
 import { buildPageMeta } from "@/lib/seo";
 
@@ -68,12 +69,12 @@ function FavPage() {
                     />
                   </div>
                 </div>
-                <button
-                  onClick={() => addToCart(p)}
+                <AnimatedAddToCartButton
+                  product={p}
+                  onAddToCart={addToCart}
+                  variant="compact"
                   className="mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-2.5 text-xs font-semibold text-white transition hover:bg-orange-500"
-                >
-                  Add to Bag <ShoppingBag className="h-3.5 w-3.5" />
-                </button>
+                />
               </div>
             ))}
           </div>

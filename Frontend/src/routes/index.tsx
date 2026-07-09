@@ -19,8 +19,10 @@ import collection1 from "@/assets/collection-1.jpg";
 import collection2 from "@/assets/collection-2.jpg";
 import collection3 from "@/assets/collection-3.jpg";
 import { Shell } from "@/components/site-shell";
+import { AnimatedAddToCartButton } from "@/components/AnimatedAddToCartButton";
 import { useStore, type Product } from "@/lib/store";
 import { useProducts, useBestsellers, useNewArrivals } from "@/hooks/use-products";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
 import { buildPageMeta, jsonLdScript, SITE_NAME } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
@@ -62,8 +64,10 @@ const dots = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#8b5cf6"];
 function ProductCard({ product }: { product: Product }) {
   const { addToCart, toggleFav, isFav } = useStore();
   const fav = isFav(product.id);
+  const revealRef = useScrollReveal<HTMLDivElement>();
+  
   return (
-    <div className="group flex h-full flex-col rounded-xl bg-white p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:p-3">
+    <div ref={revealRef} className="group flex h-full flex-col rounded-xl bg-white p-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:rounded-2xl sm:p-3 scroll-reveal premium-hover">
       <div className="relative flex flex-1 flex-col rounded-lg bg-[#f4f4f4] p-2 sm:rounded-xl sm:p-4">
         <button
           onClick={() => toggleFav(product)}
@@ -101,12 +105,12 @@ function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="mt-1.5 flex items-center justify-between px-0.5 py-1 text-[10px] text-neutral-600 sm:mt-2 sm:px-1 sm:py-1.5 sm:text-[11px]">
         <span>42 43 44</span>
-        <button
-          onClick={() => addToCart(product)}
+        <AnimatedAddToCartButton
+          product={product}
+          onAddToCart={addToCart}
+          variant="compact"
           className="flex items-center gap-1 rounded-full bg-neutral-900 px-2 py-1 text-[9px] font-semibold text-white transition hover:bg-orange-500 hover:scale-105 sm:px-3 sm:py-1.5 sm:text-[10px]"
-        >
-          Add <ShoppingBag className="h-3 w-3" />
-        </button>
+        />
       </div>
     </div>
   );
@@ -260,6 +264,14 @@ function Index() {
     loop: true,
   });
 
+  const trustedBrandsRef = useScrollReveal<HTMLDivElement>();
+  const exploreRef = useScrollReveal<HTMLDivElement>();
+  const promoBannersRef = useScrollReveal<HTMLDivElement>();
+  const bestSellingRef = useScrollReveal<HTMLDivElement>();
+  const newArrivalsRef = useScrollReveal<HTMLDivElement>();
+  const supportedRef = useScrollReveal<HTMLDivElement>();
+  const topCollectionRef = useScrollReveal<HTMLDivElement>();
+
   return (
     <Shell>
       {/* Hero */}
@@ -366,7 +378,7 @@ function Index() {
 
 
       {/* Trusted brands */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={trustedBrandsRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <h2 className="text-center font-display text-2xl font-bold md:text-3xl">Trusted By Top Brands</h2>
         <p className="mx-auto mt-2 max-w-md text-center text-sm text-neutral-500">
           Curated partners powering our shelves with the best in footwear.
@@ -400,7 +412,7 @@ function Index() {
 
 
       {/* Explore */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={exploreRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <h2 className="text-center font-display text-3xl font-bold">Explore Our Latest Collection</h2>
         <div className="mt-6 flex flex-wrap justify-center gap-6 text-sm">
           {Object.keys(categoryMap).map((label) => (
@@ -437,7 +449,9 @@ function Index() {
       </section>
 
       {/* Promo banners */}
-      <PromoBanners />
+      <div ref={promoBannersRef} className="scroll-reveal">
+        <PromoBanners />
+      </div>
 
 
       {/* Coupon marquee */}
@@ -453,7 +467,7 @@ function Index() {
       </section>
 
       {/* Best selling */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={bestSellingRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl font-bold">Best Selling Shoes</h2>
           <div className="flex items-center gap-3 text-sm text-neutral-500">
@@ -478,7 +492,7 @@ function Index() {
       </section>
 
       {/* New Arrivals */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={newArrivalsRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl font-bold">New Arrivals</h2>
           <div className="flex items-center gap-3 text-sm text-neutral-500">
@@ -516,7 +530,7 @@ function Index() {
       </section>
 
       {/* We supported by */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={supportedRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <h2 className="text-center font-display text-2xl font-bold">We Supported By</h2>
         <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
           {[
@@ -541,7 +555,7 @@ function Index() {
       </section>
 
       {/* Top Collection */}
-      <section className="px-6 pb-10 md:px-10">
+      <section ref={topCollectionRef} className="px-6 pb-10 md:px-10 scroll-reveal">
         <div className="flex items-center justify-between">
           <h2 className="font-display text-2xl font-bold">Top Collection List</h2>
           <div className="flex items-center gap-3 text-sm text-neutral-500">

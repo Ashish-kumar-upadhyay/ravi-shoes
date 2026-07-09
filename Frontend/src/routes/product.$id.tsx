@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, Heart, ShoppingBag, Star, Truck, Shield, RotateCcw, Minus, Plus } from "lucide-react";
 import { Shell } from "@/components/site-shell";
+import { AnimatedAddToCartButton } from "@/components/AnimatedAddToCartButton";
 import { useStore, useAuth } from "@/lib/store";
 import { useProductDetail, useProductReviews, useSubmitReview } from "@/hooks/use-products";
 import { productColors, productSizes } from "@/lib/products";
@@ -247,12 +248,12 @@ function ProductDetail() {
                 </button>
               </div>
 
-              <button
-                onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, img: product.img }, qty)}
-                className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold ring-1 ring-black/10 transition hover:bg-neutral-900 hover:text-white"
-              >
-                Add to Bag <ShoppingBag className="h-4 w-4" />
-              </button>
+              <AnimatedAddToCartButton
+                product={{ id: product.id, name: product.name, price: product.price, img: product.img }}
+                quantity={qty}
+                onAddToCart={addToCart}
+                className="flex-1"
+              />
               <Link
                 to="/cart"
                 onClick={() => addToCart({ id: product.id, name: product.name, price: product.price, img: product.img }, qty)}
