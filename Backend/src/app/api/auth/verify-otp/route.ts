@@ -33,12 +33,21 @@ export async function POST(req: Request) {
     // Clear OTP after successful verification
     user.otp = undefined;
     user.otpExpiry = undefined;
+    
+    // Check if this is a new user (has temporary email)
+    const isNewUser = user.email.includes('@temp.com');
+    
     await user.save();
 
     // Generate token
     const token = signToken({ userId: String(user._id), email: user.email });
 
-    const res = jsonOk({ user: formatUser(user), token });
+    const res = jsonOk({ 
+      user: formatUser(user), 
+      token,
+      isNewUser,
+      needsProfileCompletion: isNewUser
+    });
     res.headers.set(
       "Set-Cookie",
       `token=${token}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${7 * 24 * 60 * 60}`,
