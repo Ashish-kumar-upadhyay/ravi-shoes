@@ -23,7 +23,9 @@ export async function POST(req: Request) {
     
     // In production, you would send this via SMS service like Twilio
     // For now, we'll log it and return it for testing
+    console.log(`========================================`);
     console.log(`OTP for ${phone}: ${otp}`);
+    console.log(`========================================`);
     
     if (user) {
       // Update existing user's OTP
@@ -50,8 +52,8 @@ export async function POST(req: Request) {
       success: true, 
       message: "OTP sent successfully to your phone number",
       isNewUser,
-      // For testing only - remove in production
-      otp: process.env.NODE_ENV === 'development' ? otp : undefined 
+      // For testing - always return OTP
+      otp: otp
     });
   } catch (err) {
     console.error("Send OTP error:", err);
