@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     // Check if user exists with this phone
     const user = await User.findOne({ phone });
     if (!user) {
-      return jsonError("User not found with this phone number", 404);
+      return jsonError("User not found with this phone number. Please register first.", 404);
     }
 
     // Generate a 6-digit OTP
@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
     return jsonOk({ 
       success: true, 
-      message: "OTP sent successfully",
+      message: "OTP sent successfully to your phone number",
       // For testing only - remove in production
       otp: process.env.NODE_ENV === 'development' ? otp : undefined 
     });
