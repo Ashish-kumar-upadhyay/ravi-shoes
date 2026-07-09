@@ -1,6 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Lock, Mail, User, ArrowRight, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import heroShoe from "@/assets/hero-shoe.png";
 import { useAuth } from "@/lib/store";
 import { buildPageMeta } from "@/lib/seo";
@@ -19,12 +19,46 @@ export const Route = createFileRoute("/signup")({
 function SignupPage() {
   const { signUp } = useAuth();
   const navigate = useNavigate();
+  const search = useSearch({ from: "/signup" }) as { complete?: string };
+  const isCompleteProfile = search.complete === "true";
+  
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // If completing profile, password is not required
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      if (isCompleteProfile) {
+        // Complete profile flow
+        const response = await fetch(`${import.meta.env.VITE_API_URL || "https://api.luxuryshoes.dpdns.org"}/api/auth/complete-profile`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${localStorage.getItem("token")}` },
+          body: JSON.stringify({ name, email }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          navigate({ to: "/" });
+        } else {
+          setError(data.message || "Failed to complete profile");
+        }
+      } else {
+        // Normal signup flow
+        await signUp(name, email, pw);
+        navigate({ to: "/" });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : isCompleteProfile ? "Failed to complete profile" : "Registration failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#efeeea] font-sans">
@@ -36,26 +70,17 @@ function SignupPage() {
               Treadly
             </Link>
             <h1 className="font-display text-4xl font-extrabold tracking-tight">
-              Create your account
+              {isCompleteProfile ? "Complete Your Profile" : "Create your account"}
             </h1>
             <p className="mt-2 text-sm text-neutral-500">
-              Join Treadly to save favorites, track orders and unlock member drops.
+              {isCompleteProfile 
+                ? "Please provide your details to continue shopping."
+                : "Join Treadly to save favorites, track orders and unlock member drops."
+              }
             </p>
 
             <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setError("");
-                setSubmitting(true);
-                try {
-                  await signUp(name, email, pw);
-                  navigate({ to: "/" });
-                } catch (err) {
-                  setError(err instanceof Error ? err.message : "Registration failed");
-                } finally {
-                  setSubmitting(false);
-                }
-              }}
+              onSubmit={handleSubmit}
               className="mt-8 space-y-4"
             >
               {error && (
@@ -82,36 +107,44 @@ function SignupPage() {
                   className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-500"
                 />
               </Field>
-              <Field label="Password" icon={Lock}>
-                <input
-                  type={show ? "text" : "password"}
-                  required
-                  value={pw}
-                  onChange={(e) => setPw(e.target.value)}
-                  placeholder="••••••••"
-                  className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-500"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShow((s) => !s)}
-                  className="text-neutral-500 hover:text-neutral-900"
-                  aria-label="Toggle password"
-                >
-                  {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </Field>
+              
+              {!isCompleteProfile && (
+                <Field label="Password" icon={Lock}>
+                  <input
+                    type={show ? "text" : "password"}
+                    required={!isCompleteProfile}
+                    value={pw}
+                    onChange={(e) => setPw(e.target.value)}
+                    placeholder="••••••••"
+                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((s) => !s)}
+                    className="text-neutral-500 hover:text-neutral-900"
+                    aria-label="Toggle password"
+                  >
+                    {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </Field>
+              )}
 
-              <label className="flex cursor-pointer items-start gap-2 text-xs text-neutral-600">
-                <input type="checkbox" required className="mt-0.5 accent-neutral-900" />
-                I agree to Treadly's Terms of Service and Privacy Policy.
-              </label>
+              {!isCompleteProfile && (
+                <label className="flex cursor-pointer items-start gap-2 text-xs text-neutral-600">
+                  <input type="checkbox" required className="mt-0.5 accent-neutral-900" />
+                  I agree to Treadly's Terms of Service and Privacy Policy.
+                </label>
+              )}
 
               <button
                 type="submit"
                 disabled={submitting}
                 className="group mt-2 flex w-full items-center justify-center gap-2 rounded-full bg-neutral-900 py-3.5 text-sm font-semibold text-white transition hover:bg-orange-500 disabled:opacity-60"
               >
-                {submitting ? "Creating account..." : "Create Account"}
+                {submitting 
+                  ? (isCompleteProfile ? "Completing..." : "Creating account...")
+                  : (isCompleteProfile ? "Complete Profile" : "Create Account")
+                }
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </button>
             </form>

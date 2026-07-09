@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || "https://api.luxuryshoes.dpdns.org";
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 type ApiResponse<T> = { success: true; data: T } | { success: false; message: string };
 

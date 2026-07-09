@@ -33,6 +33,19 @@ function LoginPage() {
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
 
+  const handlePhoneChange = (value: string) => {
+    // Only allow digits
+    const digits = value.replace(/\D/g, "");
+    // Limit to 10 digits
+    if (digits.length <= 10) {
+      setPhone(digits);
+    }
+  };
+
+  const getFullPhoneNumber = () => {
+    return `+91${phone}`;
+  };
+
   const handleEmailLogin = async () => {
     setError("");
     setSubmitting(true);
@@ -47,34 +60,43 @@ function LoginPage() {
   };
 
   const handleSendOtp = async () => {
-    if (!phone || phone.length < 10) {
-      setError("Please enter a valid phone number");
+    if (!phone || phone.length !== 10) {
+      setError("Please enter a valid 10-digit phone number");
       return;
     }
     
     setOtpSending(true);
     setError("");
     try {
+      const fullPhone = getFullPhoneNumber();
+      console.log("Sending OTP to:", fullPhone);
+      console.log("API URL:", API_URL);
+      
       const response = await fetch(`${API_URL}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
+        body: JSON.stringify({ phone: fullPhone }),
       });
       
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
       
       if (data.success || response.ok) {
         setShowOtpInput(true);
-        // If OTP is returned in development mode, show it
+        // Display OTP for testing
         if (data.otp) {
+          alert(`Your OTP is: ${data.otp}`);
           console.log("OTP for testing:", data.otp);
+        } else {
+          setError("OTP not returned from server");
         }
       } else {
         setError(data.message || "Failed to send OTP");
       }
     } catch (err) {
       console.error("Send OTP error:", err);
-      setError("Failed to send OTP. Please try again.");
+      setError(`Failed to send OTP: ${err instanceof Error ? err.message : 'Unknown error'}`);
     } finally {
       setOtpSending(false);
     }
@@ -90,10 +112,11 @@ function LoginPage() {
     setOtpVerifying(true);
     setError("");
     try {
+      const fullPhone = getFullPhoneNumber();
       const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, otp: otpValue }),
+        body: JSON.stringify({ phone: fullPhone, otp: otpValue }),
       });
       
       const data = await response.json();
@@ -103,7 +126,13 @@ function LoginPage() {
         if (data.user) {
           // Update auth state if user data returned
         }
-        navigate({ to: "/" });
+        
+        // If new user, redirect to complete profile page
+        if (data.isNewUser || data.needsProfileCompletion) {
+          navigate({ to: "/signup", search: { complete: "true" } });
+        } else {
+          navigate({ to: "/" });
+        }
       } else {
         setError(data.message || "Invalid OTP");
       }
@@ -331,13 +360,14 @@ function LoginPage() {
                       </label>
                       <div className="flex items-center gap-2 rounded-full bg-[#f4f4f4] px-4 py-3 transition focus-within:bg-white focus-within:ring-2 focus-within:ring-neutral-900">
                         <Phone className="h-4 w-4 text-neutral-500" />
+                        <span className="text-sm font-semibold text-neutral-900">+91</span>
                         <input
                           type="tel"
                           required
                           value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          placeholder="+91 98765 43210"
-                          maxLength={15}
+                          onChange={(e) => handlePhoneChange(e.target.value)}
+                          placeholder="98765 43210"
+                          maxLength={10}
                           className="flex-1 bg-transparent text-sm outline-none placeholder:text-neutral-500"
                         />
                       </div>
@@ -346,7 +376,7 @@ function LoginPage() {
                     <div className="space-y-4">
                       <div className="space-y-1.5">
                         <label className="text-xs font-semibold uppercase tracking-wider text-neutral-600">
-                          Enter OTP sent to {phone}
+                          Enter OTP sent to +91 {phone}
                         </label>
                         <div className="flex gap-2">
                           {otp.map((digit, index) => (

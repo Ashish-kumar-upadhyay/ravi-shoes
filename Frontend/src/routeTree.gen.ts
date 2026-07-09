@@ -16,6 +16,7 @@ import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FavoritesRouteImport } from './routes/favorites'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as CompleteProfileRouteImport } from './routes/complete-profile'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as AdminSettingsRouteImport } from './routes/admin-settings'
 import { Route as AdminProductsRouteImport } from './routes/admin-products'
@@ -60,6 +61,11 @@ const FavoritesRoute = FavoritesRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompleteProfileRoute = CompleteProfileRouteImport.update({
+  id: '/complete-profile',
+  path: '/complete-profile',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CartRoute = CartRouteImport.update({
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/cart': typeof CartRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/cart': typeof CartRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -162,6 +170,7 @@ export interface FileRoutesById {
   '/admin-products': typeof AdminProductsRoute
   '/admin-settings': typeof AdminSettingsRoute
   '/cart': typeof CartRoute
+  '/complete-profile': typeof CompleteProfileRoute
   '/faq': typeof FaqRoute
   '/favorites': typeof FavoritesRoute
   '/login': typeof LoginRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/cart'
+    | '/complete-profile'
     | '/faq'
     | '/favorites'
     | '/login'
@@ -202,6 +212,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/cart'
+    | '/complete-profile'
     | '/faq'
     | '/favorites'
     | '/login'
@@ -221,6 +232,7 @@ export interface FileRouteTypes {
     | '/admin-products'
     | '/admin-settings'
     | '/cart'
+    | '/complete-profile'
     | '/faq'
     | '/favorites'
     | '/login'
@@ -241,6 +253,7 @@ export interface RootRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   CartRoute: typeof CartRoute
+  CompleteProfileRoute: typeof CompleteProfileRoute
   FaqRoute: typeof FaqRoute
   FavoritesRoute: typeof FavoritesRoute
   LoginRoute: typeof LoginRoute
@@ -300,6 +313,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/complete-profile': {
+      id: '/complete-profile'
+      path: '/complete-profile'
+      fullPath: '/complete-profile'
+      preLoaderRoute: typeof CompleteProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cart': {
@@ -385,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   CartRoute: CartRoute,
+  CompleteProfileRoute: CompleteProfileRoute,
   FaqRoute: FaqRoute,
   FavoritesRoute: FavoritesRoute,
   LoginRoute: LoginRoute,
