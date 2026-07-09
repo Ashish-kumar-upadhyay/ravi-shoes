@@ -5,6 +5,7 @@ import heroShoe from "@/assets/hero-shoe.png";
 import { useAuth } from "@/lib/store";
 import { API_URL } from "@/lib/api";
 import { buildPageMeta } from "@/lib/seo";
+import { sendFirebaseOtp, verifyFirebaseOtp } from "@/lib/firebase";
 
 export const Route = createFileRoute("/login")({
   head: () =>
@@ -69,30 +70,14 @@ function LoginPage() {
     setError("");
     try {
       const fullPhone = getFullPhoneNumber();
-      console.log("Sending OTP to:", fullPhone);
-      console.log("API URL:", API_URL);
+      console.log("Sending Firebase OTP to:", fullPhone);
       
-      const response = await fetch(`${API_URL}/api/auth/send-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: fullPhone }),
-      });
+      const result = await sendFirebaseOtp(fullPhone);
       
-      console.log("Response status:", response.status);
-      const data = await response.json();
-      console.log("Response data:", data);
-      
-      if (data.success || response.ok) {
+      if (result.success) {
         setShowOtpInput(true);
-        // Display OTP for testing
-        if (data.otp) {
-          alert(`Your OTP is: ${data.otp}`);
-          console.log("OTP for testing:", data.otp);
-        } else {
-          setError("OTP not returned from server");
-        }
       } else {
-        setError(data.message || "Failed to send OTP");
+        setError(result.error || "Failed to send OTP");
       }
     } catch (err) {
       console.error("Send OTP error:", err);
@@ -112,29 +97,41 @@ function LoginPage() {
     setOtpVerifying(true);
     setError("");
     try {
-      const fullPhone = getFullPhoneNumber();
-      const response = await fetch(`${API_URL}/api/auth/verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: fullPhone, otp: otpValue }),
-      });
+      const result = await verifyFirebaseOtp(otpValue);
       
-      const data = await response.json();
-      
-      if (data.success && data.token) {
-        localStorage.setItem("token", data.token);
-        if (data.user) {
-          // Update auth state if user data returned
-        }
+      if (result.success && result.user) {
+        // Get Firebase ID token
+        const idToken = await result.user.getIdToken();
         
-        // If new user, redirect to complete profile page
-        if (data.isNewUser || data.needsProfileCompletion) {
-          navigate({ to: "/signup", search: { complete: "true" } });
+        // Send token to backend to create/update user
+        const response = await fetch(`${API_URL}/api/auth/firebase-login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            idToken,
+            phone: getFullPhoneNumber()
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.token) {
+          localStorage.setItem("token", data.token);
+          if (data.user) {
+            // Update auth state if user data returned
+          }
+          
+          // If new user, redirect to complete profile page
+          if (data.isNewUser || data.needsProfileCompletion) {
+            navigate({ to: "/signup", search: { complete: "true" } });
+          } else {
+            navigate({ to: "/" });
+          }
         } else {
-          navigate({ to: "/" });
+          setError(data.message || "Login failed");
         }
       } else {
-        setError(data.message || "Invalid OTP");
+        setError(result.error || "Invalid OTP");
       }
     } catch (err) {
       setError("Failed to verify OTP. Please try again.");
@@ -282,6 +279,9 @@ function LoginPage() {
               }}
               className="mt-6 space-y-4"
             >
+              {/* Hidden reCAPTCHA container for Firebase */}
+              <div id="recaptcha-container" style={{ display: 'none' }}></div>
+              
               {error && (
                 <p className="rounded-full bg-red-50 px-4 py-2 text-center text-sm text-red-600 ring-1 ring-red-200">
                   {error}
